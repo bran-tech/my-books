@@ -16,7 +16,7 @@
         <dependency>
             <groupId>tech.bran.book</groupId>
             <artifactId>book-api</artifactId>
-            <version>${version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
