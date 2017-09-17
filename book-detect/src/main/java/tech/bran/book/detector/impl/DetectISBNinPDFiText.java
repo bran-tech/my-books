@@ -21,17 +21,25 @@ public class DetectISBNinPDFiText implements ISBNDetector {
 
     private static final Logger L = LoggerFactory.getLogger(DetectISBNinPDFiText.class);
 
-    final int searchLimitBegin = 5;
+    final int searchLimitBegining = 5;
+    final int searchLimitEnding = 5;
 
     @Override
     public void scan(File file, BookAnalysis collector) throws IOException {
 
-        L.trace("scanning {} pages of {} for isbn...", searchLimitBegin, file);
+        L.trace("scanning first {} pages of {} for isbn...", searchLimitBegining, file);
 
         final PdfReader reader = new PdfReader(file.getPath());
 
         int pages = reader.getNumberOfPages();
-        for (int p = 1; p < pages && p < searchLimitBegin; p++) {
+        for (int p = 1; p < pages && p < searchLimitBegining; p++) {
+            final String text = PdfTextExtractor.getTextFromPage(reader, p, new SimpleTextExtractionStrategy());
+            ScanUtil.scanFileForISBN(new StringReader(text), collector);
+        }
+
+        L.trace("scanning last {} pages of {} for isbn...", searchLimitEnding, file);
+
+        for (int p = Integer.max(pages - searchLimitEnding, searchLimitBegining); p < pages; p++) {
             final String text = PdfTextExtractor.getTextFromPage(reader, p, new SimpleTextExtractionStrategy());
             ScanUtil.scanFileForISBN(new StringReader(text), collector);
         }

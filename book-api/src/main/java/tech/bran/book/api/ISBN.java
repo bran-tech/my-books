@@ -14,11 +14,17 @@ public class ISBN {
     final ISBNValidator v = ISBNValidator.getInstance();
 
     public ISBN(String isbn) {
+        if (isbn == null) {
+            throw new IllegalArgumentException("null isbn");
+        }
+
         if (v.isValidISBN10(isbn)) {
             this.isbn10 = isbn;
-            this.isbn13 = v.convertToISBN13(isbn);
+            this.isbn13 = v.convertToISBN13(isbn.replace("-", ""));
+
         } else if (v.isValidISBN13(isbn)) {
-            this.isbn13 = isbn;
+            this.isbn13 = isbn.replace(" ", "-");
+
         } else {
             throw new IllegalArgumentException("invalid isbn " + isbn);
         }
@@ -38,11 +44,16 @@ public class ISBN {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final ISBN isbn = (ISBN) o;
-        return isbn13.equals(isbn.isbn13);
+        return getIsbn13Number().equals(isbn.getIsbn13Number());
+    }
+
+    public String getIsbn13Number() {
+        return isbn13.replaceAll("-", "");
     }
 
     @Override
     public int hashCode() {
-        return isbn13.hashCode();
+        return getIsbn13Number().hashCode();
     }
+
 }

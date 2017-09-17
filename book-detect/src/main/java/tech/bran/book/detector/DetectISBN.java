@@ -17,6 +17,12 @@ public class DetectISBN {
 
     private static final Logger L = LoggerFactory.getLogger(DetectISBN.class);
 
+    /**
+     * try to detect the ISBN using different strategies / detectors.
+     *
+     * @param file
+     * @return
+     */
     public BookAnalysis detect(File file) {
         L.trace("detect({})", file);
 
@@ -28,9 +34,13 @@ public class DetectISBN {
 
         new DetectISBNByName().scan(file, analysis);
 
-        final String contentType = URLConnection.guessContentTypeFromName(file.getName());
+        final String contentType = URLConnection.guessContentTypeFromName(file.getName()); //TODO improve
+        analysis.setContentType(contentType);
 
-        if ("application/pdf".equals(contentType)) {
+        if (null == contentType) {
+            L.warn("Failed to detect contentType for {}", file);
+
+        } else if ("application/pdf".equals(contentType)) {
             try {
                 new DetectISBNinPDFiText().scan(file, analysis);
                 //new DetectISBNinPDF().scan(file, analysis);

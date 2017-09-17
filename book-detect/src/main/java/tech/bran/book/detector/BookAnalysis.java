@@ -1,6 +1,8 @@
 package tech.bran.book.detector;
 
-import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tech.bran.book.api.ISBN;
 
 import java.util.Comparator;
@@ -13,15 +15,36 @@ import java.util.Map;
  */
 public class BookAnalysis {
 
+    final Logger L = LoggerFactory.getLogger(BookAnalysis.class);
+
     /**
      * detected ISBNs
      */
     private Map<ISBN, Integer> ISBNs = new LinkedHashMap<>();
     private boolean corruptFile;
+    private String contentType;
+
+    // most probable ISBN
+    private ISBN probable;
 
     public BookAnalysis addISBN(ISBN isbn) {
-        final int i = ObjectUtils.defaultIfNull(ISBNs.get(isbn), 0);
-        ISBNs.put(isbn, i + 1);
+        for (Map.Entry<ISBN, Integer> item : ISBNs.entrySet()) {
+            if (item.equals(isbn)) {
+                // we try to keep the version with dashes
+                if (StringUtils.contains(item.getKey().getISBN(), "-")) {
+                    item.setValue(item.getValue() + 1);// increment nr of apparitions
+                } else {
+                    ISBNs.put(isbn, item.getValue() + 1); // increment nr of apparitions
+                }
+                return this;
+            }
+        }
+
+        // add new item
+        ISBNs.put(isbn, 1);
+
+        probable = null;
+
         return this;
     }
 
@@ -35,10 +58,22 @@ public class BookAnalysis {
     }
 
     public ISBN getProbableISBN() {
-        if (ISBNs.size() == 0) {
-            return null;
+        if (probable == null) {
+            if (ISBNs.size() != 0) {
+                //TODO better strategy
+
+                final Map.Entry<ISBN, Integer> max = ISBNs.entrySet().stream().max(Comparator.comparing(Map.Entry::getValue)).orElse(null);
+
+                if (max != null) {
+                    probable = max.getKey();
+
+                    final int total = ISBNs.entrySet().stream().mapToInt(Map.Entry::getValue).sum();
+                    final double probability = (double) max.getValue() / (total + 1);
+                    L.debug("ISBN: {}  probability: {}", probable, probability);
+                }
+            }
         }
-        return ISBNs.entrySet().stream().max(Comparator.comparing(Map.Entry::getValue)).orElse(null).getKey(); //TODO
+        return probable;
     }
 
     public String getProbableISBNCode() {
@@ -48,5 +83,14 @@ public class BookAnalysis {
 
     public boolean isFileCorrupt() {
         return corruptFile;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public BookAnalysis setContentType(String contentType) {
+        this.contentType = contentType;
+        return this;
     }
 }

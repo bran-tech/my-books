@@ -3,6 +3,7 @@ package tech.bran.book.detector.impl;
 import org.apache.commons.validator.routines.ISBNValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.bran.book.api.C;
 import tech.bran.book.api.ISBN;
 import tech.bran.book.detector.BookAnalysis;
 import tech.bran.book.detector.ISBNDetector;
@@ -22,7 +23,7 @@ public class DetectISBNByName implements ISBNDetector {
     @Override
     public void scan(File file, BookAnalysis collector) {
         final String name = file.getName();
-        final Pattern extractor = Pattern.compile("\\d[\\d -]{8,}\\d");
+        final Pattern extractor = Pattern.compile(C.SIMPLE_ISBN_MATCHER);
         final Matcher m = extractor.matcher(name);
 
         while (m.find()) {
