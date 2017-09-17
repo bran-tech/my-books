@@ -88,13 +88,14 @@ public class BookScanCLI implements Callable<Integer> {
         if (p != null) {
             p.printRecord(file.getName(), analysis.getProbableISBNCode(), analysis.getContentType(),
                     analysis.isFileCorrupt(), file.getPath());
-        } else {
-            if (analysis.isFileCorrupt()) {
-                System.out.println(file.getPath() + " : corrupt");
-            } else {
-                System.out.println(file.getPath() + " : " + analysis.getProbableISBNCode());
-            }
         }
+
+        if (analysis.isFileCorrupt()) {
+            System.out.println(file.getPath() + " : corrupt");
+        } else {
+            System.out.println(file.getPath() + " : " + analysis.getProbableISBNCode());
+        }
+
         return analysis.getProbableISBN() != null;
     }
 }

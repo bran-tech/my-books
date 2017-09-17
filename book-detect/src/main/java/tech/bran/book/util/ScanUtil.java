@@ -18,9 +18,10 @@ public class ScanUtil {
 
     static final Logger L = LoggerFactory.getLogger(ScanUtil.class);
 
-    public static void scanFileForISBN(Readable input, BookAnalysis collector) {
+    public static int scanFileForISBN(Readable input, BookAnalysis collector) {
         final Pattern extractor = Pattern.compile(C.SIMPLE_ISBN_MATCHER);
         final Scanner s = new Scanner(input);
+        int found = 0;
 
         String match;
         do {
@@ -30,6 +31,7 @@ public class ScanUtil {
                 L.debug("scanFileForISBN() found candidate: {}", match);
                 try {
                     collector.addISBN(new ISBN(match));
+                    found++;
                 } catch (Exception e) {
                     L.debug("Invalid ISBN {}. ({})", match, e.getMessage());
                 }
@@ -37,5 +39,6 @@ public class ScanUtil {
         } while (match != null);
 
         L.trace("scanFileForISBN() done");
+        return found;
     }
 }
