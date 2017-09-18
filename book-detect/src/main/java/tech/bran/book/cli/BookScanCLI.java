@@ -4,6 +4,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import picocli.CommandLine;
 import tech.bran.book.api.C;
 import tech.bran.book.detector.BookAnalysis;
@@ -47,14 +48,13 @@ public class BookScanCLI implements Callable<Integer> {
             return 0;
         }
 
-        final String[] extensions = new String[]{"pdf", "doc", "txt", "epub", "mobi"};
         final DetectISBN detector = new DetectISBN();
         int total = 0, detected = 0;
 
         final CSVPrinter printer = !export ? null :
                 CSVFormat.DEFAULT.withDelimiter(';').withEscape('"')
                         .withHeader("File", "ISBN", "ContentType", "Corrupt", "Path")
-                        .print(new File("result" + new Date() + ".csv"), C.UTF8);
+                        .print(new File("result_" + DateFormatUtils.format(new Date(), "yyyyMMdd_HHmmss") + ".csv"), C.UTF8);
 
         try {
             if (fileToScan.isFile()) {
@@ -64,6 +64,7 @@ public class BookScanCLI implements Callable<Integer> {
                 }
                 total++;
             } else {
+                final String[] extensions = new String[]{"pdf", "doc", "txt", "epub", "mobi"};
 
                 for (File file : FileUtils.listFiles(fileToScan, extensions, recursive)) {
 
